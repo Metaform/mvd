@@ -20,8 +20,6 @@ database database
 component [Connector\nDeployment] as c1
 component [FCC\nDeployment] as fcc1
 
-
-
 c1 <.up.> ds1
 fcc1 <.up.> ds1
 c1 <.up.> ds2
