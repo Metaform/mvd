@@ -1,6 +1,6 @@
 # Identity Topologies
 
-This document enumerates the possible participant *__identity topologies__* in a dataspace. Note that identity topologies are independent of the underlying identity technology (e.g. centralized or decentralized) used by the dataspace.     
+This document enumerates the possible participant *__identity topologies__* in a dataspace. Note that identity topologies are independent of the underlying identity technology used by the dataspace (e.g. centralized or decentralized).     
 
 ## 1..N Topology: One Identifier, Multiple Dataspaces
 
