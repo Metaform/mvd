@@ -1,0 +1,26 @@
+@startuml offboarding
+autonumber "<b>0'.'"
+box "Company1" #LightBlue
+Participant "Company1\nEDC" as Company1EDC
+Participant "Company1\nDID" as Company1DID
+Participant "Company1\nIdentity Hub" as IDHUB1
+end box
+
+box "Dataspace Authority" #LightYellow
+Participant "Registry API" as RAPI
+Database "Participant\nRegistry" as Registry
+end box
+
+Company1EDC --> RAPI: send Offboarding request
+activate RAPI
+RAPI --> Company1DID: obtain DID Document
+RAPI --> RAPI: verify request JWS\nwith Public Key
+group optional [Check VC]
+   RAPI --> IDHUB1: query(VC name) 
+   IDHUB1 --> RAPI: return VC
+end
+RAPI --> Registry: delete Company1's DID URI
+return status code
+deactivate RAPI
+
+@enduml

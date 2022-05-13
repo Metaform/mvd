@@ -55,13 +55,37 @@ In simple scenarios, enrollement could be fast and fully automated. However, in 
 11. Company1's Identity Hub validates the bearer token and stores the membership Verifiable Credential.
 
 ### 2. Offboarding
+
+#### Participants
+1. Company1, an entity which intends to offboard, i.e leave the datasapce
+2. The Dataspace Authority, which manages the members list
+
+#### Overview
+Company1 initiates the offboarding process by sending a request to the offboarding API of the Dataspace Authority. This request contains the DID URI signed with Company1's private key. The Dataspace Authority must make verify the identity of Company1 by resolving the DID and verifying the signature. 
+
+_As an additional security measure the request could also contain any one of Company1's VCs, which the Dataspace Authority must then query from Company1's IdentityHub and check for equality._
+
+Company1 can choose to re-onboard anytime, assuming all conditions in that flow are still met.
+
+#### Pre-conditions
+1. Company1 is a member of the Dataspace, i.e. the Dataspace Authority contains Company1's DID URI in its member list.
+2. Company1 is not blacklisted
+3. [optional] Company1 has an Identity Hub that contains at least one VC.
+
+#### Post-conditions
+1. Dataspace Authority does not have Company1's DID URI in its member list anymore.
+
+#### Flow sequence
+![offboarding](offboarding.png)
+
 ### 3. Blacklisting
+todo
 
 ### 4. Get Member List
 
 #### Participants
 
-1. Company1, a Dataspace Participant with an EDC application that wants to discover IDS endpoints (for instance, in order to list contract offers)
+1. Company1, a Dataspace Participant with an EDC application that wants to discover participants (for instance, in order to query contract offers)
 2. The Dataspace Authority, which manages the participant registry
 3. Company2, Company3, etc., Dataspace Participants
 
@@ -84,11 +108,13 @@ None
 ![list-participants](list-participants.png)
 
 1. The EDC for Company1 determines the Self-description document endpoint from the Dataspace DID Document.
-2. The EDC for Company1 determines the Dataspace Registry endpoint from the Self-description document.
+2. The EDC for Company1 determines the Dataspace Registry endpoint from the Self Description document.
 3. The EDC for Company1 issues a request to the Dataspace Registry, to list participants.
 4. The Registry uses the Distributed authorization sub-flow (see above) to authenticate the request...
 5. ... and retrieve credentials from Company1's Identity Hub.
 6. The Registry authorizes the request by applying the Registry access policy on the obtained Verifiable Credentials. For example, the caller must be a valid Dataspace Participant.
 7. The Registry obtains the list of Dataspace Participant DID URIs from its storage...
 8. ... and returns it synchronously to the caller (Company1 EDC).
-9. The EDC for Company1 iterates through the list of DID URIs, retrieves the corresponding DIDd documents, and from there, resolves each participant's Self Description document.and retrieves the collection of their IDS endpoints from their DID Documents.
+9. The EDC for Company1 iterates through the list of DID URIs, retrieves the corresponding DID documents, and from it resolves each participant's Self Description document. The Self Description document contains all relevant information such as IDS endpoints.
+
+_Note: Steps 1 - 2 could be cached_
