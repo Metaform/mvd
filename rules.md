@@ -1,6 +1,6 @@
 # Rules
 
-This document outlines the inviolable technical rules of a dataspace.
+This document outlines the inviolable technical rules of a dataspace and its participants built using MVD/EDC technologies.
 
 1. [Identifiers](terminology.md#identifier) can be reused across a dataspaces. For example, a participant may use the same identifier in two or more dataspaces.
 
