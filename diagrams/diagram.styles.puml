@@ -1,0 +1,54 @@
+
+
+!$blue = "#066DFA"
+!$gray = "#98A3AB"
+!$lightGray = "#F4F5F9"
+!$darkGray = "#747C94"
+!$green =  "#24DCC1"
+!$blueFill =  "#E4EBFA"
+!$greenFill =  "#CFFBDE"
+
+
+skinparam sequence {
+ArrowColor Black
+LifeLineBorderColor 000000
+LifeLineBackgroundColor #A9DCDF
+}
+
+skinparam ArrowColor $darkGray
+skinparam ArrowHeadColor $darkGray
+skinparam LifeLineBackgroundColor $darkGray
+
+skinparam AgentBackgroundColor White
+skinparam AgentBorderColor #066DFA
+
+
+skinparam CloudBackgroundColor $lightGray
+skinparam CloudBorderColor  $gray
+skinparam CloudFontColor  Black
+
+skinparam ArtifactBackgroundColor $lightGray
+skinparam ArtifactBorderColor $gray
+
+skinparam ComponentBackgroundColor $blueFill
+skinparam ComponentBorderColor $blue
+skinparam ComponentFontColor Black
+
+skinparam DatabaseBackgroundColor $greenFill
+skinparam DatabaseBorderColor $green
+skinparam DatabaseFontColor Black
+
+
+skinparam SequenceGroupBorderColor #DADADA
+skinparam SequenceGroupHeaderFontColor #898A89
+skinparam BoxPadding 20
+skinparam ParticipantPadding 10
+
+skinparam AgentBackgroundColor White
+skinparam AgentBorderColor SkyBlue
+skinparam noteBorderColor FEF3BF
+skinparam SequenceBoxBorderColor F2F2F2
+skinparam shadowing false
+
+skinparam NoteBackgroundColor FEFFDD
+
