@@ -5,9 +5,29 @@ For the sake of this document, we'll use the terms "Registration Service" and "D
 ## Requirements
 - must have its own did:web
 
-## Data models
 
 ## Architecture
+
+### Overview
+The MVD's Registration Service will be written in Java and should re-use the runtime framework and modules from EDC. This enables us to leverage the same functionality such as policy validation, re-use domain objects and architectural principles. The following sections expand on those.
+
+### Asynchronicity
+Potentially long-running operations such as onboarding and offboarding must be asynchronous and are handled using the [statemachine concept](https://github.com/eclipse-dataspaceconnector/DataSpaceConnector/blob/70271b5b3427c9a26198fa8d43a08519be4ffba6/common/state-machine-lib/src/main/java/org/eclipse/dataspaceconnector/common/statemachine/StateMachine.java). 
+The state machine is operated in such a way that domain objects are loaded from storage, processed and then put back into storage to make the registration service runtime stateless.
+
+There could be different state machines for the different operations.
+
+### Serializability
+Domain objects must be fully serializable so that they can be stored in some data backend. 
+
+### Extensibility
+Even though the first iteration of the MVD will rely heavily on `did:web` for identity resolution and resolving the self-description, it should be possible in subsequent development cycles to replace this with another authentication mechanism such as OAuth2.
+
+This implies that objects such as a `SelfDescriptionResolver` must be extensible through the established EDC extensibility model.
+
+In future iterations it could even be possible to move certain parts of the registration service, such as the Trust Root (that signs partipants' VCs) into separate runtimes.
+
+
 
 ## Operations
 ### 1. Onboarding
@@ -79,7 +99,7 @@ Company1 can choose to re-onboard anytime, assuming all conditions in that flow 
 ![offboarding](offboarding.png)
 
 ### 3. Blacklisting
-todo
+not yet specified
 
 ### 4. Get Member List
 
@@ -118,3 +138,25 @@ None
 9. The EDC for Company1 iterates through the list of DID URIs, retrieves the corresponding DID documents, and from it resolves each participant's Self Description document. The Self Description document contains all relevant information such as IDS endpoints.
 
 _Note: Steps 1 - 2 could be cached_
+
+
+## Data Models (wip)
+_Note: this serves only to create a mental model, and is not a complete or final spec!_
+
+1. Onboarding:
+```java
+public class OnboardingRequest {
+    /**
+     * For the MVD this is a JWT that contains the candidate's DID URI, signed with its private key.
+     * In future versions this could also contain other tokens.
+     */
+    private String identityToken;
+
+    /**
+     * Contains various information about the connector. For MVD this is technically redundant.
+     */
+    private SelfDescription selfDescription;
+}
+```
+
+A note about the `selfDescription`
