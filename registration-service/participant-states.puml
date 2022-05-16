@@ -1,0 +1,25 @@
+@startuml Participant Status Transitions
+
+[*] --> ONBOARDING_INITIATED: request received
+
+ONBOARDING_INITIATED: resolveDid()
+ONBOARDING_INITIATED: verifyDid()
+ONBOARDING_INITIATED: resolveSdd()
+ONBOARDING_INITIATED: getCredentials()
+
+AUTHORIZING: applyEnrollmentPolicy()
+AUTHORIZING: storeParticipantInformation()
+
+ONBOARDING_INITIATED --> AUTHORIZING
+
+AUTHORIZING --> GRANTING_ACCESS
+GRANTING_ACCESS: createVerifiableCredential() 
+GRANTING_ACCESS: storeVcInHub()
+
+GRANTING_ACCESS --> AUTHORIZED
+
+AUTHORIZED --> ACCESS_REVOKED: Offboarding flow
+AUTHORIZED --> BANNED: Blacklisting flow
+
+
+@enduml

@@ -83,14 +83,14 @@ In simple scenarios, enrollement could be fast and fully automated. However, in 
 #### Overview
 Company1 initiates the offboarding process by sending a request to the offboarding API of the Dataspace Authority. This request contains the DID URI signed with Company1's private key. The Dataspace Authority must make verify the identity of Company1 by resolving the DID and verifying the signature. 
 
-_As an additional security measure the request could also contain any one of Company1's VCs, which the Dataspace Authority must then query from Company1's IdentityHub and check for equality._
+_As an additional security measure the request must also contain one or several of Company1's VCs, which the Dataspace Authority must then query from Company1's IdentityHub and check for equality._
 
 Company1 can choose to re-onboard anytime, assuming all conditions in that flow are still met.
 
 #### Pre-conditions
 1. Company1 is a member of the Dataspace, i.e. the Dataspace Authority contains Company1's DID URI in its member list.
 2. Company1 is not blacklisted
-3. [optional] Company1 has an Identity Hub that contains at least one VC.
+3. Company1 has an Identity Hub that contains the VCs contained in the offboarding request.
 
 #### Post-conditions
 1. Dataspace Authority does not have Company1's DID URI in its member list anymore.
@@ -141,9 +141,9 @@ _Note: Steps 1 - 2 could be cached_
 
 
 ## Data Models (wip)
-_Note: this serves only to create a mental model, and is not a complete or final spec!_
 
-1. Onboarding:
+### 1. Onboarding:
+To initiate onboarding, clients send an `OnboardingRequest` to the dataspace authority's enrollment API endpoint:
 ```java
 public class OnboardingRequest {
     /**
@@ -153,10 +153,72 @@ public class OnboardingRequest {
     private String identityToken;
 
     /**
-     * Contains various information about the connector. For MVD this is technically redundant.
+     * the URI where the Self-Description Document is hosted. Can be null if did:web is used.
      */
-    private SelfDescription selfDescription;
+    private String selfDescriptionUri;
 }
 ```
 
-A note about the `selfDescription`
+A note about the `selfDescriptionUri`: when using the `did:web` it is technically not necessary to embed the `SelfDescriptionUri` string directly in the `OnboardingRequest`, as DID document may contain the SDD URI. However, other (future) methods may not have that option and require the SDD URI to be embedded. If `did:web` is used, this property _may_ be null and the registration service must resolve the SDD URI from the DID document.
+
+In order for the Onboarding request to be successful, the SDD and the IdentityHub must be publicly accessible. The API shall return a success message to indicate that _the request was successfully received_. 
+
+Upon receiving an `OnboardingRequest`, the registration service shall create a [participant record](README.md#3-participant-record), that contains all information about a participant. This is comparable to a user account in a typical consumer application. When using `did:web`, the most important thing in that record is the participant's DID URI. 
+
+_Question: should the initial `OnboardingRequest` be persisted alongside for auditability?_
+
+### 2. Offboarding
+When a participant wants to leave the dataspace, it must transmit an `OffboardingRequest` to the dataspace authority's offboarding endpoint:
+```java
+public class OffboardingRequest {
+    /**
+     * For the MVD this is a JWT that contains the candidate's DID URI, signed with its private key.
+     * In future versions this could also contain other tokens.
+     */
+    private String identityToken;
+
+    /**
+     * Contains a list of verified claims (key = claim name, value = JWT), which are used to further authenticate the sender.
+     */
+    private Map<String, String> verifiedClaims;
+}
+```
+
+
+### 3. Participant record
+```java
+public class ParticipantRecord {
+    private String id; //internal identifier
+    private String dataspaceIdentifier; //did-uri, or any other external identifier of the participant
+    private String name; //for convenience, may be omitted
+    private ParticipantStatus status; // see below
+}
+```
+To track a participant's status in the dataspace, the following object will be used:
+```java
+public class ParticipantStatusInfo {
+    private String statusDescription; //contains additional information about the status, such as error messages, etc.
+    private ParticipantStatus status; //the status flag
+}
+
+public enum ParticipantStatus {
+    ONBOARDING_INITIATED, // onboarding request received
+    AUTHORIZING, // verifying participants credentials
+    GRANTING_ACCESS, // create and send membership VCs
+    AUTHORIZED, // participant is fully onboarded
+    ACCESS_REVOKED, // participant voluntarily relinquished access -> Offboarding
+    BANNED, //participant is not allowed in the DS anymore. Currently not in use, see Blacklisting
+    ERROR, // something went wrong during on- or offboarding
+}
+```
+Recalling the [onboarding flow](README.md#1-onboarding) the following mapping and subsequent state diagrams emerge:
+| Onboarding step | `ParticipantStatus`      |
+| --------------- | ------------------------ |
+| 3-5             | `ONBOARDING_INITIATED`   |
+| 6, 7            | `AUTHORIZING`            |
+| 8-11          | `GRANTING_ACCESS`        |
+|                 | `AUTHORIZED`             |
+
+![state-diagram](participant-states.png)
+
+Transitioning from any state to `ERROR` must always be possible.

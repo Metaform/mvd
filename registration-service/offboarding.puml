@@ -15,7 +15,7 @@ Company1EDC --> RAPI: send Offboarding request
 activate RAPI
 RAPI --> Company1DID: obtain DID Document
 RAPI --> RAPI: verify request JWS\nwith Public Key
-group optional [Check VC]
+group Check VC
    RAPI --> IDHUB1: query(VC name) 
    IDHUB1 --> RAPI: return VC
 end
