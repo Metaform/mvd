@@ -1,0 +1,36 @@
+@startuml "n-1"
+!pragma layout smetana
+
+!include diagrams/diagram.styles.puml
+
+cloud Dataspace1 as ds1
+
+frame "Identity 1" {
+component [Connector\nDeployment] as c1
+component [FCC\nDeployment] as fcc1
+artifact Identifier as id1
+database database1
+}
+
+frame "Identity 2" {
+component [Connector\nDeployment] as c2
+component [FCC\nDeployment] as fcc2
+artifact Identifier as id2
+database database2
+}
+
+c1 <.up.> ds1
+fcc1 <.up.> ds1
+c2 <.up.> ds1
+fcc2 <.up.> ds1
+
+fcc1 ..> database1
+fcc2 ..> database2
+
+id1 -up-c1
+id1 -up-fcc1
+
+id2 -up-c2
+id2 -up-fcc2
+
+@enduml
