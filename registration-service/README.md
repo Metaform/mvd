@@ -30,6 +30,45 @@ In future iterations it could even be possible to move certain parts of the regi
 
 
 ## Operations
+
+### 0. Authorization sub-flow
+
+This sub-flow is used within the flows further in this document, for a service to authenticate and authorize requests from a Dataspace Participant.
+
+#### Participants
+
+1. A Participant A, which performs a request to Participant B. Participant A could be a company enrolled within a dataspace.
+2. A Participant B, which serves a request to Participant A, and needs to establish Participant A's credentials. Participant B could be a company enrolled within a dataspace, or the Dataspace Authority, depending on the flow.
+
+#### Overview
+
+Participant A needs to establish its identity and credentials in order to access a service from Participant B. Selecting and transporting Participant A's verifiable credentials in request headers would be too bulky and put too much logic in the client code. Therefore, Participant A sends it DID (in a JWS) and a bearer token, allowing Participant B to authenticate the request, and obtain Participant A's verifiable credentials from its Identity Hub.
+
+A DID JWS cannot be used by Participant B to authenticate itself to Participant A's Identity Hub, as endless recursion would ensue.
+
+#### Pre-conditions
+
+1. Participant A has deployed an Identity Hub service, and a DID Document containing the Identity Hub URL.
+2. Participant A's Identity Hub contains VCs that satisfy Participant B's service access policy.
+
+#### Post-conditions
+
+None
+
+#### Flow sequence
+
+![distributed-authorization](distributed-authorization.png)
+
+1. The Client for Participant A (which could be EDC, or any other application) sends a request to Participant B's API. The client needs access to Participant A's Private Key to sign a JWS. It also sends a time-limited bearer token granting access to its Identity Hub.
+2. Participant B retrieves the DID Document based on the DID URI contained in the JWS.
+3. Participant B authenticates the request by validating the JWS signature against the public key in the DID Document.
+4. Participant B retrieves the Self-description Document based on the URL contained in the DID Document.
+5. Participant B finds Participant A's Identity Hub URL in the Self-description Document. It authorizes the request by obtaining VCs for Participant A at its Identity Hub, using the bearer token sent initially by Participant A.
+6. Participant A's Identity Hub verifies the bearer token validity.
+7. Participant A's Identity Hub returns Participant A's Verifiable Credentials.
+8. Participant B applies its access policy for the given service. This applies expiration dates and Certificate Revocation Lists to filter valid Verifiable Credentials, and rules specific to a given service. For example, the caller must be a dataspace participant (i.e. have a valid Verifiable Credential signed by the Dataspace Authority, that establishes its dataspace membership).
+9. Participant B returns the service response if the request was successfully authorized, otherwise, an error response. Depending on the flow, the response can be synchronously or asynchronously returned.
+
 ### 1. Onboarding
 
 #### Participants
@@ -148,6 +187,7 @@ None
 9. The EDC for Company1 iterates through the list of DID URIs, retrieves the corresponding DID documents, and from it resolves each participant's Self Description document. The Self Description document contains all relevant information such as IDS endpoints.
 
 _Note: Steps 1 - 2 could be cached_
+
 
 
 ## Data Models (wip)

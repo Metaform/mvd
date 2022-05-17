@@ -1,4 +1,4 @@
-@startuml Participant Status Transitions
+@startuml participant-states
 
 [*] --> ONBOARDING_INITIATED: request received
 
