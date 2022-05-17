@@ -3,13 +3,13 @@
 For the sake of this document, we'll use the terms "Registration Service" and "Dataspace Authority"
 
 ## Requirements
-- must have its own did:web
+- must have its own `did:web`
 
 
 ## Architecture
 
 ### Overview
-The MVD's Registration Service will be written in Java and should re-use the runtime framework and modules from EDC. This enables us to leverage the same functionality such as policy validation, re-use domain objects and architectural principles. The following sections expand on those.
+The MVD's Registration Service will be written in Java and re-use the runtime framework and modules from EDC. This enables us to leverage the same functionality such as policy validation, re-use domain objects and architectural principles. The following sections expand on those.
 
 ### Asynchronicity
 Potentially long-running operations such as onboarding and offboarding must be asynchronous and are handled using the [statemachine concept](https://github.com/eclipse-dataspaceconnector/DataSpaceConnector/blob/70271b5b3427c9a26198fa8d43a08519be4ffba6/common/state-machine-lib/src/main/java/org/eclipse/dataspaceconnector/common/statemachine/StateMachine.java). 
@@ -45,6 +45,8 @@ The Dataspace Authority enrollment service obtains Verifiable Credentials from C
 
 In simple scenarios, enrollement could be fast and fully automated. However, in advanced scenarios, enrollment policies could require interactions with external systems, and even manual processes. Therefore, it is implemented asynchronously.
 
+There could be different "types" of onboarding, e.g. onboarding a participant or a credential issuer, so the architecture has to support that.
+
 #### Pre-conditions
 
 1. A root CA is established and trusted by all participants. (Intermediate CAs are out of scope in this simplified discussion)
@@ -74,6 +76,9 @@ In simple scenarios, enrollement could be fast and fully automated. However, in 
 10. The DA sends the Verifiable Credential to Company1's Identity Hub for storage. It uses the Identity Hub bearer token (from the Distributed authorization sub-flow) to authenticate the request.
 11. Company1's Identity Hub validates the bearer token and stores the membership Verifiable Credential.
 
+#### Open questions
+- is onboarding different for participants, issuers or participant _agents_? There may be multiple states, state machines, etc.
+
 ### 2. Offboarding
 
 #### Participants
@@ -83,7 +88,9 @@ In simple scenarios, enrollement could be fast and fully automated. However, in 
 #### Overview
 Company1 initiates the offboarding process by sending a request to the offboarding API of the Dataspace Authority. This request contains the DID URI signed with Company1's private key. The Dataspace Authority must make verify the identity of Company1 by resolving the DID and verifying the signature. 
 
-_As an additional security measure the request must also contain one or several of Company1's VCs, which the Dataspace Authority must then query from Company1's IdentityHub and check for equality._
+
+
+_As an additional security measure the request must also contain either a nonce or one or several of Company1's VCs, which the Dataspace Authority must then query from Company1's IdentityHub and check for equality._
 
 Company1 can choose to re-onboard anytime, assuming all conditions in that flow are still met.
 
@@ -97,6 +104,9 @@ Company1 can choose to re-onboard anytime, assuming all conditions in that flow 
 
 #### Flow sequence
 ![offboarding](offboarding.png)
+
+#### Open questions
+- is it better to attach a nonce or a VC to the offboarding request to avoid hijacking/impersonation attacks?
 
 ### 3. Blacklisting
 not yet specified
@@ -151,15 +161,10 @@ public class OnboardingRequest {
      * In future versions this could also contain other tokens.
      */
     private String identityToken;
-
-    /**
-     * the URI where the Self-Description Document is hosted. Can be null if did:web is used.
-     */
-    private String selfDescriptionUri;
 }
 ```
 
-A note about the `selfDescriptionUri`: when using the `did:web` it is technically not necessary to embed the `SelfDescriptionUri` string directly in the `OnboardingRequest`, as DID document may contain the SDD URI. However, other (future) methods may not have that option and require the SDD URI to be embedded. If `did:web` is used, this property _may_ be null and the registration service must resolve the SDD URI from the DID document.
+the `indentityToken` has to be a JWT that contains the URI where the SDD is located as a claim called `"sdd"`. In the case of `did:web` this claim may be omitted, since the SDD can be resolved from the DID document.
 
 In order for the Onboarding request to be successful, the SDD and the IdentityHub must be publicly accessible. The API shall return a success message to indicate that _the request was successfully received_. 
 
@@ -186,12 +191,14 @@ public class OffboardingRequest {
 
 
 ### 3. Participant record
+A participant record represents a connector's user profile, it can be updated optimistically. However, the `status` field should be a foreign-key type reference and it should only be modified sequentially.
 ```java
 public class ParticipantRecord {
     private String id; //internal identifier
     private String dataspaceIdentifier; //did-uri, or any other external identifier of the participant
     private String name; //for convenience, may be omitted
-    private ParticipantStatus status; // see below
+    private ParticipantStatusInfo status; // see below
+    private Map<String, Object> extensibleProperties; // may be empty
 }
 ```
 To track a participant's status in the dataspace, the following object will be used:
@@ -216,9 +223,11 @@ Recalling the [onboarding flow](README.md#1-onboarding) the following mapping an
 | --------------- | ------------------------ |
 | 3-5             | `ONBOARDING_INITIATED`   |
 | 6, 7            | `AUTHORIZING`            |
-| 8-11          | `GRANTING_ACCESS`        |
+| 8-11            | `GRANTING_ACCESS`        |
 |                 | `AUTHORIZED`             |
 
 ![state-diagram](participant-states.png)
 
 Transitioning from any state to `ERROR` must always be possible.
+
+_Note: the states' names really are placeholders at this time, they may change during implementation._
