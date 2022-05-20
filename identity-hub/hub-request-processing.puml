@@ -1,0 +1,29 @@
+@startuml "hub-request-processing"
+!pragma layout smetana
+
+!include ../diagrams/diagram.styles.puml
+
+start
+partition "API Controller" {
+    : Deserialize Message;
+    partition "Access Control & Authorization" {
+        :Verify DID; 
+        :Verify Permissions;
+    }
+}
+
+partition "Request Processing" {
+    :Verify Request;
+    :Interface Method Processor;
+    switch ()
+    case () 
+        :Collections Method Processor;
+        : Message Processor;
+    case () 
+        :Other Method Processors...;
+endswitch
+
+}
+stop
+
+@enduml

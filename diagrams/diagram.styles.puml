@@ -57,3 +57,16 @@ skinparam NoteBackgroundColor FEFFDD
 skinparam FrameBackgroundColor $lightGray
 skinparam FrameBorderColor $lightGray
 skinparam FrameFontColor $darkGray
+
+skinparam ActivityBackgroundColor $blueFill
+
+skinparam ActivityBackgroundColor $blueFill
+skinparam ActivityBorderColor $blue
+skinparam ActivityEndColor $blue
+skinparam ActivityStartColor $blue
+skinparam ActivityDiamondBackgroundColor $lightGray
+skinparam ActivityDiamondBorderColor $blue
+
+skinparam PartitionBackgroundColor $lightGray
+skinparam PartitionBorderColor $darkGray
+skinparam PartitionFontColor $darkGray
