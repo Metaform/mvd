@@ -102,7 +102,7 @@ The EDC policy evaluator is currently planned to be used as the basis for permis
 
  
 #### Request Processing
-The request processing pipeline is the central dispatch mechanism in the hub. It is transport agnostic and receives requests after they have been de-marshalled by an API controller. The following activity diagram depicts the request processing flow:
+The request processing pipeline is the central dispatch mechanism in the hub. It is transport agnostic and receives requests after they have been de-marshalled by an API controller. The following diagram depicts the request processing flow:
 
 ![Request Flow](hub-request-processing.png)
 
