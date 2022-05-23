@@ -2,7 +2,7 @@
 
 ## I. Overview
 
-The document serves as a technical specification for the __*Identity Hub*__. An identity hub is a credential storage and message relay system run by a participant. The hub is intended to serve as a foundation for participant messaging protocols in a dataspace. In particular, the identity hub will be used to securely deliver verifiable credentials from a __dataspace issuer__ to a __dataspace participant__. The hub will also be used to provide verifiable presentations on behalf of a participant. 
+This document serves as a technical specification for the __*Identity Hub*__. An identity hub is a credential storage and message relay system run by a participant. The hub is intended to serve as a foundation for participant messaging protocols in a dataspace. In particular, the identity hub will be used to securely deliver verifiable credentials from a __dataspace issuer__ to a __dataspace participant__. The hub will also be used to provide verifiable presentations on behalf of a participant. 
 
 The Identity Hub will support relevant parts of the [Decentralized Web Node specification (DWN)](#decentralized-web-node-specification). It should also be possible to support other APIs in the future, if required.
 
@@ -155,7 +155,7 @@ https://github.com/TBD54566975/tbdex-whitepaper/blob/main/whitepaper.pdf
 
 ## Open Issues
 
-##### Object Id storage
+#### Object Id storage
 The object id may need to include the interface name, id (https://github.com/decentralized-identity/decentralized-web-node/issues/147).
 
 #### Designing a Dataspace Protocol 
