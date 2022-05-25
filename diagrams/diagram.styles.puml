@@ -40,7 +40,8 @@ skinparam DatabaseBackgroundColor $greenFill
 skinparam DatabaseBorderColor $green
 skinparam DatabaseFontColor Black
 
-
+skinparam ParticipantBorderColor $blue
+skinparam ParticipantBackgroundColor $blueFill
 skinparam SequenceGroupBorderColor #DADADA
 skinparam SequenceGroupHeaderFontColor #898A89
 skinparam BoxPadding 20

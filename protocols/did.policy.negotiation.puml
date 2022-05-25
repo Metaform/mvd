@@ -1,0 +1,45 @@
+@startuml "did-policy-negotiation"
+!pragma layout smetana
+
+!include ../diagrams/diagram.styles.puml
+
+
+participant Participant #DDF1D0
+participant ParticipantDomain #DDF1D0
+participant ParticipantHub #DDF1D0
+participant ParticipantDataPlane #DDF1D0
+
+Participant -> Provider : JWS w/ DID (signed by private key)
+
+group Resolve DID and SD
+Provider ->DIDResolver
+DIDResolver -> Provider: Participant EDC DID document
+DIDResolver ->  ParticipantDomain: HTTP(S) GET participant.com/did.json
+DIDResolver -> Provider: DID document
+ParticipantDomain -> DIDResolver: DID document
+Provider -> Provider: Verify JWT with public key in DID document
+Provider ->  ParticipantHub: Get SD (resolved via DID document)
+ParticipantHub -> Provider: SD document
+Provider -> ProviderStore: Get data contract
+ProviderStore -> Provider: Data contract
+end
+
+group Verify Participant A
+Provider -> ProviderPolicyEngine: Verify participant.com (Data Contract, DID & SD documents)
+ProviderPolicyEngine -> Provider: OK
+end
+
+group Provision Data
+Provider -> ProviderProvisioner: Provision data
+ProviderProvisioner -> Provider: Data address and access key
+end
+
+Provider ->  Participant: OK, data address and key
+
+group #DADADA Data Plane 
+Participant -> ParticipantDataPlane: Get data (data address and access key)
+ParticipantDataPlane -> ProviderDataStorage: Get data w/ access key
+ProviderDataStorage -> ParticipantDataPlane: Data
+end
+
+@enduml
